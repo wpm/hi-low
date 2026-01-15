@@ -1,0 +1,66 @@
+name: Trigger Next Issues
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  find-and-trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find newly unblocked issues
+        id: find_issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Make scripts executable
+          chmod +x .github/scripts/find-unblocked-issues.sh
+          chmod +x .github/scripts/trigger-claude.sh
+
+          # Find unblocked issues (pass arguments explicitly)
+          UNBLOCKED=$(.github/scripts/find-unblocked-issues.sh \
+            ${{ github.event.issue.number }} \
+            ${{ vars.OWNER }} \
+            ${{ github.event.repository.name }})
+
+          # Save to output
+          echo "unblocked<<EOF" >> $GITHUB_OUTPUT
+          echo "$UNBLOCKED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          # Count issues
+          COUNT=$(echo "$UNBLOCKED" | grep -c '^' || echo 0)
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "Found $COUNT unblocked issues"
+
+      - name: Trigger Claude on unblocked issues
+        if: steps.find_issues.outputs.count > 0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Trigger Claude using the script (pass arguments explicitly)
+          echo "${{ steps.find_issues.outputs.unblocked }}" | \
+            .github/scripts/trigger-claude.sh \
+            ${{ vars.OWNER }} \
+            ${{ github.event.repository.name }}
+
+      - name: Summary
+        run: |
+          echo "## Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Closed issue: #${{ github.event.issue.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "Newly unblocked issues: ${{ steps.find_issues.outputs.count }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.find_issues.outputs.count }}" -gt 0 ]; then
+            echo "Triggered Claude on the following issues:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.find_issues.outputs.unblocked }}" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No new issues were unblocked." >> $GITHUB_STEP_SUMMARY
+          fi

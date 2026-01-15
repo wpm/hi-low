@@ -1,0 +1,12 @@
+# Issue Implementation
+- Read the README.md file first to get an overview of the project.
+- Update the GitHub project status to "In Progress" when you start working on the issue.
+- Only create the functionality specified in the issue.
+- Always write unit tests to exercise whatever new functionality you just created.
+- Strive for 100% code coverage. (You may have to skip tricky error conditions.)
+- Check in intermediate work that makes a large change.
+- If the github issue description contains checkboxes, check them off as you complete tasks.
+- When you think the issue is complete, run all tests.
+- If any test fails, keep working on the issue until all tests pass. "Iterate until green."
+- Once the issue is complete and all tests are passing, submit a pull request.
+- Update the GitHub project status to "Done" when the pull request is created.
