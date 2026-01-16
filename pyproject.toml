@@ -5,6 +5,9 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = []
 
+[project.scripts]
+hi-low = "hi_low.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
