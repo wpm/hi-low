@@ -3,7 +3,7 @@
 from hi_low.evaluation import Evaluation, evaluate
 
 
-def game_loop(value: int, max_guesses: int) -> bool:
+def game_loop(value: int, max_guesses: int, min_value: int, max_value: int) -> bool:
     """
     Run the main game loop for the Hi-Low guessing game.
 
@@ -14,13 +14,15 @@ def game_loop(value: int, max_guesses: int) -> bool:
     Args:
         value: The target value that the player needs to guess.
         max_guesses: The maximum number of guesses allowed.
+        min_value: Minimum allowed value (inclusive).
+        max_value: Maximum allowed value (inclusive).
 
     Returns:
         True if the player guessed correctly within max_guesses, False otherwise.
     """
     for _ in range(max_guesses):
         guess = int(input())
-        result = evaluate(value, guess)
+        result = evaluate(value, guess, min_value, max_value)
         print(result.value)
 
         if result == Evaluation.CORRECT:

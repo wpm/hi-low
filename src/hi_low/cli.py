@@ -57,7 +57,7 @@ def main() -> None:
     value = random.randint(args.min_value, args.max_value)
 
     # Run the game loop
-    won = game_loop(value, args.max_guesses)
+    won = game_loop(value, args.max_guesses, args.min_value, args.max_value)
 
     # Print the result
     if won:
