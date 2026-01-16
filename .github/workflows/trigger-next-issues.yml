@@ -21,6 +21,13 @@ jobs:
           chmod +x .github/scripts/find-unblocked-issues.sh
           chmod +x .github/scripts/trigger-claude.sh
 
+          # Verify OWNER variable is set
+          if [ -z "${{ vars.OWNER }}" ]; then
+            echo "Error: OWNER repository variable is not set"
+            echo "Please set it in Settings → Secrets and variables → Actions → Variables"
+            exit 1
+          fi
+
           # Find unblocked issues (pass arguments explicitly)
           UNBLOCKED=$(.github/scripts/find-unblocked-issues.sh \
             ${{ github.event.issue.number }} \
@@ -43,10 +50,17 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Trigger Claude using the script (pass arguments explicitly)
+          # PROJECT_NUMBER is optional - use '-' if not set
+          PROJECT_ARG="${{ vars.PROJECT_NUMBER }}"
+          if [ -z "$PROJECT_ARG" ]; then
+            PROJECT_ARG="-"
+          fi
+
           echo "${{ steps.find_issues.outputs.unblocked }}" | \
             .github/scripts/trigger-claude.sh \
             ${{ vars.OWNER }} \
-            ${{ github.event.repository.name }}
+            ${{ github.event.repository.name }} \
+            "$PROJECT_ARG"
 
       - name: Summary
         run: |
